@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
@@ -141,6 +142,7 @@ public class MainActivity extends AppCompatActivity {
             clearText(edtSearch);
             InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(edtSearch.getWindowToken(), 0);
+            Log.d(TAG, "listener: ");
         });
 
         imClose.setOnClickListener(v -> clearText(edtSearch));
