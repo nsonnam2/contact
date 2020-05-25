@@ -2,34 +2,24 @@ package com.example.contact.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
-import android.widget.FrameLayout;
-import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.Fragment;
 
 import com.example.contact.R;
-import com.vdurmont.emoji.Emoji;
-import com.vdurmont.emoji.EmojiManager;
-import com.vdurmont.emoji.EmojiParser;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import emoji4j.EmojiUtils;
-import io.github.rockerhieu.emojicon.EmojiconEditText;
+import hani.momanii.supernova_emoji_library.Helper.EmojiconEditText;
+import hani.momanii.supernova_emoji_library.Helper.EmojiconTextView;
 import io.github.rockerhieu.emojicon.EmojiconGridFragment;
-import io.github.rockerhieu.emojicon.EmojiconTextView;
 import io.github.rockerhieu.emojicon.EmojiconsFragment;
-import io.github.rockerhieu.emojicon.emoji.Emojicon;
 
 public class EmopjiActivity extends AppCompatActivity implements EmojiconGridFragment.OnEmojiconClickedListener, EmojiconsFragment.OnEmojiconBackspaceClickedListener {
 
@@ -58,7 +48,7 @@ public class EmopjiActivity extends AppCompatActivity implements EmojiconGridFra
     }
 
     @Override
-    public void onEmojiconClicked(Emojicon emojicon) {
+    public void onEmojiconClicked(io.github.rockerhieu.emojicon.emoji.Emojicon emojicon) {
         String s = name += emojicon.getEmoji();
         textView.setText(s);
 
@@ -105,5 +95,4 @@ public class EmopjiActivity extends AppCompatActivity implements EmojiconGridFra
         return matchList.get(matchList.size() - 1);
 
     }
-
 }
