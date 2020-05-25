@@ -12,13 +12,6 @@
         android:layout_marginTop="30dp"
         android:layout_centerHorizontal="true"/>
 
-    <io.github.rockerhieu.emojicon.EmojiconEditText
-        android:id="@+id/editEmojicon"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        emojicon:emojiconSize="28sp"
-        android:layout_centerInParent="true"/>
-
     <fragment
         android:id="@+id/emojicons"
         class="io.github.rockerhieu.emojicon.EmojiconsFragment"

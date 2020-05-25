@@ -57,17 +57,14 @@ public class EmopjiActivity extends AppCompatActivity implements EmojiconGridFra
 
     }
 
-    private void setEmojiconFragment(boolean useSystemdefault) {
-        getSupportFragmentManager().beginTransaction().commit();
-    }
-
-    String emoji = "";
-
     @Override
     public void onEmojiconClicked(Emojicon emojicon) {
+        String s = name += emojicon.getEmoji();
+        textView.setText(s);
+
 //        Log.d(TAG, "onEmojiconClicked: " + emojicon.getEmoji());
 //        textView.setText(name + emojicon.getEmoji());
-        Log.d(TAG, "onEmojiconClicked: " + EmojiUtils.shortCodify(emojicon.getEmoji()));
+        Log.d(TAG, "onEmojiconClicked: " + EmojiUtils.shortCodify(s));
     }
 
     @Override
@@ -76,57 +73,36 @@ public class EmopjiActivity extends AppCompatActivity implements EmojiconGridFra
 //        collection.add(EmojiManager.getForAlias("wink"));
 //        Log.d(TAG, "onEmojiconBackspaceClicked: " + EmojiParser.removeEmojis(textView.getText().toString(), collection));
 
-        main(textView.getText().toString()
-        );
+        Log.d(TAG, "onEmojiconBackspaceClicked: " + EmojiUtils.shortCodify(getLastEmoji(textView.getText().toString())));
+        String s = textView.getText().toString();
+        if (s.endsWith(":")){
+
+        }
 
     }
 
+    public String getLastEmoji(String name) {
+        String regexPattern = "[\uD83C-\uDBFF\uDC00-\uDFFF]+";
+        byte[] utf8 = new byte[0];
+        String string1 = null;
 
-
-    public static String mysqlSafe(String input) {
-        if (input == null) return null;
-        StringBuilder sb = new StringBuilder();
-
-        for (int i = 0; i < input.length(); i++) {
-            if (i < (input.length() - 1)) { // Emojis are two characters long in java, e.g. a rocket emoji is "\uD83D\uDE80";
-                if (Character.isSurrogatePair(input.charAt(i), input.charAt(i + 1))) {
-                    i += 1; //also skip the second character of the emoji
-                    continue;
-                }
-            }
-            sb.append(input.charAt(i));
+        try {
+            utf8 = name.getBytes("UTF-8");
+            string1 = new String(utf8, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
         }
 
-        return sb.toString();
+        Pattern pattern = Pattern.compile(regexPattern);
+        Matcher matcher = pattern.matcher(string1);
+        ArrayList<String> matchList = new ArrayList<String>();
+
+        while (matcher.find()) {
+            matchList.add(matcher.group());
+        }
+
+        return matchList.get(matchList.size() - 1);
+
     }
-
-        public void main(String name) {
-            String regexPattern = "[\uD83C-\uDBFF\uDC00-\uDFFF]+";
-            byte[] utf8 = new byte[0];
-            try {
-                utf8 = name.getBytes("UTF-8");
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            }
-
-            String string1 = null;
-            try {
-                string1 = new String(utf8, "UTF-8");
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            }
-
-            Pattern pattern = Pattern.compile(regexPattern);
-            Matcher matcher = pattern.matcher(string1);
-            ArrayList<String> matchList = new ArrayList<String>();
-
-            while (matcher.find()) {
-                matchList.add(matcher.group());
-            }
-
-            for(int i=0;i<matchList.size();i++){
-                Log.d(TAG, "mainnn: " + EmojiUtils.shortCodify(matchList.get(i)));
-            }
-        }
 
 }
