@@ -1,32 +1,24 @@
-<?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:emojicon="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
-    <hani.momanii.supernova_emoji_library.Helper.EmojiconTextView
-        android:id="@+id/tv_emoji"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="26dp"
-        android:textAppearance="@style/TextAppearance.AppCompat.Large"
-        android:textColor="#000000"
-        emojicon:emojiconSize="45sp"
-        emojicon:emojiconUseSystemDefault="true" />
-
-    <hani.momanii.supernova_emoji_library.Helper.EmojiconEditText
-        android:id="@+id/edt_emoji"
+    <io.github.rockerhieu.emojicon.EmojiconTextView
+        android:id="@+id/txtEmojicon"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        emojicon:emojiconSize="28sp"
-        android:layout_below="@+id/tv_emoji"/>
+        emojicon:emojiconAlignment="baseline" />
 
-    <Button
+    <io.github.rockerhieu.emojicon.EmojiconEditText
+        android:id="@+id/editEmojicon"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Save"
-        android:id="@+id/btn_save"
-        android:layout_alignParentBottom="true"/>
+        emojicon:emojiconSize="28sp" />
 
-</RelativeLayout>
+    <FrameLayout
+        android:id="@+id/emojicons"
+        class="io.github.rockerhieu.emojicon.EmojiconsFragment"
+        android:layout_width="match_parent"
+        android:layout_height="220dp" />
+</LinearLayout>

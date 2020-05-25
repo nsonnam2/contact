@@ -47,6 +47,9 @@ dependencies {
 
     implementation 'hani.momanii.supernova_emoji_library:supernova-emoji-library:0.0.2'
     implementation 'com.vdurmont:emoji-java:5.1.1'
-    implementation 'com.rockerhieu.emojicon:library:1.3.3'
+
+    implementation 'io.github.rockerhieu:emojicon:1.4.1'
+
+    implementation 'com.kcthota:emoji4j:+'
 
 }

@@ -2,29 +2,27 @@
     xmlns:emojicon="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="15dp">
+    android:orientation="vertical">
 
-    <com.rockerhieu.emojicon.EmojiconTextView
+    <io.github.rockerhieu.emojicon.EmojiconTextView
         android:id="@+id/txtEmojicon"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        emojicon:emojiconAlignment="baseline"/>
+        emojicon:emojiconAlignment="baseline"
+        android:layout_marginTop="30dp"
+        android:layout_centerHorizontal="true"/>
 
-    <com.rockerhieu.emojicon.EmojiconEditText
-        android:id="@+id/edtEmojicon"
+    <io.github.rockerhieu.emojicon.EmojiconEditText
+        android:id="@+id/editEmojicon"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         emojicon:emojiconSize="28sp"
-        android:layout_below="@+id/txtEmojicon"
-        android:layout_marginTop="25dp"/>
+        android:layout_centerInParent="true"/>
 
     <fragment
         android:id="@+id/emojicons"
+        class="io.github.rockerhieu.emojicon.EmojiconsFragment"
         android:layout_width="match_parent"
-        android:layout_height="fill_parent"
-        android:layout_below="@+id/edtEmojicon"
-        android:layout_marginTop="25dp"
-       class="com.example.contact.fragment.ContactFragment"/>
-
+        android:layout_height="220dp"
+        android:layout_alignParentBottom="true"/>
 </RelativeLayout>

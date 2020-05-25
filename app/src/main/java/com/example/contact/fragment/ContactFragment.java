@@ -25,6 +25,7 @@ import com.example.contact.R;
 import com.example.contact.activity.EmopjiActivity;
 import com.example.contact.activity.MainActivity;
 import com.example.contact.adapter.ContactAdapter;
+import com.example.contact.dialog.EmojiDialog;
 import com.example.contact.model.Contact;
 import com.example.contact.utils.Utils;
 import com.vdurmont.emoji.EmojiManager;
@@ -72,7 +73,12 @@ public class ContactFragment extends Fragment {
         contactAdapter.setListener(new ContactAdapter.Listener() {
             @Override
             public void itemContactClick(Contact contact) {
+//               EmojiDialog emojiDialog = new EmojiDialog();
+//               emojiDialog.show(getFragmentManager(), null);
+
                 Intent intent = new Intent(getContext(), EmopjiActivity.class);
+                intent.putExtra("name", contact.getName());
+                intent.putExtra("id", contact.getId());
                 startActivity(intent);
             }
         });
