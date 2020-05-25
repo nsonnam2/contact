@@ -1,0 +1,30 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:emojicon="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="15dp">
+
+    <com.rockerhieu.emojicon.EmojiconTextView
+        android:id="@+id/txtEmojicon"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        emojicon:emojiconAlignment="baseline"/>
+
+    <com.rockerhieu.emojicon.EmojiconEditText
+        android:id="@+id/edtEmojicon"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        emojicon:emojiconSize="28sp"
+        android:layout_below="@+id/txtEmojicon"
+        android:layout_marginTop="25dp"/>
+
+    <fragment
+        android:id="@+id/emojicons"
+        android:layout_width="match_parent"
+        android:layout_height="fill_parent"
+        android:layout_below="@+id/edtEmojicon"
+        android:layout_marginTop="25dp"
+       class="com.example.contact.fragment.ContactFragment"/>
+
+</RelativeLayout>

@@ -5,6 +5,7 @@ import android.content.ContentProviderResult;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.provider.ContactsContract;
@@ -21,14 +22,18 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.contact.R;
+import com.example.contact.activity.EmopjiActivity;
 import com.example.contact.activity.MainActivity;
 import com.example.contact.adapter.ContactAdapter;
 import com.example.contact.model.Contact;
 import com.example.contact.utils.Utils;
+import com.vdurmont.emoji.EmojiManager;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -67,7 +72,8 @@ public class ContactFragment extends Fragment {
         contactAdapter.setListener(new ContactAdapter.Listener() {
             @Override
             public void itemContactClick(Contact contact) {
-//                updateContactName(getContext(), contact.getId(), "aaaa");
+                Intent intent = new Intent(getContext(), EmopjiActivity.class);
+                startActivity(intent);
             }
         });
 
@@ -75,7 +81,7 @@ public class ContactFragment extends Fragment {
         mainActivity.setSearch(s -> {
             ArrayList<Contact> listContacts = new ArrayList<>();
             for (int i = 0; i < list.size(); i++) {
-                if (list.get(i).getName().toLowerCase().contains(s.toLowerCase()) && list.get(i).getType() == Contact.Type.CONTACT){
+                if (list.get(i).getName().toLowerCase().contains(s.toLowerCase()) && list.get(i).getType() == Contact.Type.CONTACT) {
                     listContacts.add(list.get(i));
                 }
             }
@@ -84,7 +90,34 @@ public class ContactFragment extends Fragment {
             contactAdapter.notifyDataSetChanged();
         });
 
+        ArrayList<Contact> contacts = new ArrayList<>();
+
+        for (int i = 0; i < list.size(); i++) {
+            if (list.get(i).getType() == Contact.Type.CONTACT){
+                if (check(list.get(i))){
+                    contacts.add(list.get(i));
+                }
+            }
+        }
+
+        for (int i = 0; i < contacts.size(); i++) {
+            Log.d(TAG, "onActivityCreated: " + contacts.get(i).getName());
+        }
+
     }
+
+    private boolean check(Contact contact) {
+        String userinp = contact.getName();
+        for (int i = 0; i < userinp.length() - 1; i++) {
+            if (((int) userinp.charAt(i)) > 0 && ((int) userinp.charAt(i)) < 127) {
+                Log.d(TAG, "check: " + userinp);
+            } else {
+                return true;
+            }
+        }
+        return false;
+    }
+
 
     public static void updateContactName(Context context, String contactId, String newName) {
         try {
@@ -103,8 +136,6 @@ public class ContactFragment extends Fragment {
 
         }
     }
-
-
 
 
     private ArrayList<Contact> getContactList(Context context) {
@@ -130,7 +161,7 @@ public class ContactFragment extends Fragment {
                     while (pCur.moveToNext()) {
                         String phoneNo = pCur.getString(pCur.getColumnIndex(
                                 ContactsContract.CommonDataKinds.Phone.NUMBER));
-                        Contact contact = new Contact(id, name, Contact.Type.CONTACT);
+                        Contact contact = new Contact(id, name, Contact.Type.CONTACT, false);
                         list.add(contact);
                     }
                     pCur.close();

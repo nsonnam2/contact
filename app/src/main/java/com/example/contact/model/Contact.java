@@ -9,11 +9,13 @@ public class Contact implements Serializable {
     private String id;
     private String name;
     private Type type;
+    private boolean emoji;
 
-    public Contact(String id, String name, Type type) {
+    public Contact(String id, String name, Type type, boolean emoji) {
         this.id = id;
         this.name = name;
         this.type = type;
+        this.emoji = emoji;
     }
 
     public String getId() {
@@ -38,5 +40,13 @@ public class Contact implements Serializable {
 
     public Type getType() {
         return type;
+    }
+
+    public boolean isEmoji() {
+        return emoji;
+    }
+
+    public void setEmoji(boolean emoji) {
+        this.emoji = emoji;
     }
 }
