@@ -76,7 +76,7 @@ public class EmopjiActivity extends AppCompatActivity implements EmojiconGridFra
         Log.d(TAG, "onEmojiconBackspaceClicked: " + EmojiUtils.shortCodify(getLastEmoji(textView.getText().toString())));
         String s = textView.getText().toString();
         if (s.endsWith(":")){
-
+            // TODO: 5/25/2020 delete single last emoji 
         }
 
     }
@@ -101,6 +101,7 @@ public class EmopjiActivity extends AppCompatActivity implements EmojiconGridFra
             matchList.add(matcher.group());
         }
 
+        // TODO: 5/25/2020 get single last emoji 
         return matchList.get(matchList.size() - 1);
 
     }
