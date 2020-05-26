@@ -3,7 +3,6 @@ package com.example.contact.fragment;
 import android.content.ContentProviderOperation;
 import android.content.ContentProviderResult;
 import android.content.ContentResolver;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -17,24 +16,17 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.contact.R;
-import com.example.contact.activity.EmopjiActivity;
+import com.example.contact.activity.EmojiActivity;
 import com.example.contact.activity.MainActivity;
 import com.example.contact.adapter.ContactAdapter;
-import com.example.contact.dialog.EmojiDialog;
 import com.example.contact.model.Contact;
 import com.example.contact.utils.Utils;
-import com.vdurmont.emoji.EmojiManager;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -76,7 +68,7 @@ public class ContactFragment extends Fragment {
 //               EmojiDialog emojiDialog = new EmojiDialog();
 //               emojiDialog.show(getFragmentManager(), null);
 
-                Intent intent = new Intent(getContext(), EmopjiActivity.class);
+                Intent intent = new Intent(getContext(), EmojiActivity.class);
                 intent.putExtra("name", contact.getName());
                 intent.putExtra("id", contact.getId());
                 startActivity(intent);
@@ -99,8 +91,8 @@ public class ContactFragment extends Fragment {
         ArrayList<Contact> contacts = new ArrayList<>();
 
         for (int i = 0; i < list.size(); i++) {
-            if (list.get(i).getType() == Contact.Type.CONTACT){
-                if (check(list.get(i))){
+            if (list.get(i).getType() == Contact.Type.CONTACT) {
+                if (Utils.check(list.get(i).getName())) {
                     contacts.add(list.get(i));
                 }
             }
@@ -112,61 +104,24 @@ public class ContactFragment extends Fragment {
 
     }
 
-    private boolean check(Contact contact) {
-        String userinp = contact.getName();
-        for (int i = 0; i < userinp.length() - 1; i++) {
-            if (((int) userinp.charAt(i)) > 0 && ((int) userinp.charAt(i)) < 127) {
-                Log.d(TAG, "check: " + userinp);
-            } else {
-                return true;
-            }
-        }
-        return false;
-    }
-
-
-    public static void updateContactName(Context context, String contactId, String newName) {
-        try {
-            ArrayList<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
-
-            ops.add(ContentProviderOperation.newUpdate(ContactsContract.Data.CONTENT_URI)
-                    .withSelection(ContactsContract.CommonDataKinds.Phone._ID + "=? AND " +
-                                    ContactsContract.Data.MIMETYPE + "='" +
-                                    ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE + "'",
-                            new String[]{contactId})
-                    .withValue(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME, newName)
-                    .build());
-
-            ContentProviderResult[] result = context.getContentResolver().applyBatch(ContactsContract.AUTHORITY, ops);
-        } catch (Exception e) {
-
-        }
-    }
-
-
     private ArrayList<Contact> getContactList(Context context) {
         ArrayList<Contact> list = new ArrayList<>();
         ContentResolver cr = context.getContentResolver();
-        Cursor cur = cr.query(ContactsContract.Contacts.CONTENT_URI,
-                null, null, null, null);
+        Cursor cur = cr.query(ContactsContract.Contacts.CONTENT_URI, null, null, null, null);
 
         if ((cur != null ? cur.getCount() : 0) > 0) {
             while (cur != null && cur.moveToNext()) {
-                String id = cur.getString(
-                        cur.getColumnIndex(ContactsContract.Contacts._ID));
-                String name = cur.getString(cur.getColumnIndex(
-                        ContactsContract.Contacts.DISPLAY_NAME));
+                String id = cur.getString(cur.getColumnIndex(ContactsContract.Contacts._ID));
+                String name = cur.getString(cur.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
 
-                if (cur.getInt(cur.getColumnIndex(
-                        ContactsContract.Contacts.HAS_PHONE_NUMBER)) > 0) {
-                    Cursor pCur = cr.query(
-                            ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+                if (cur.getInt(cur.getColumnIndex(ContactsContract.Contacts.HAS_PHONE_NUMBER)) > 0) {
+                    Cursor pCur = cr.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
                             null,
                             ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = ?",
-                            new String[]{id}, null);
+                            new String[]{id},
+                            null);
                     while (pCur.moveToNext()) {
-                        String phoneNo = pCur.getString(pCur.getColumnIndex(
-                                ContactsContract.CommonDataKinds.Phone.NUMBER));
+                        String phoneNo = pCur.getString(pCur.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
                         Contact contact = new Contact(id, name, Contact.Type.CONTACT, false);
                         list.add(contact);
                     }
@@ -177,6 +132,7 @@ public class ContactFragment extends Fragment {
         if (cur != null) {
             cur.close();
         }
+
         return list;
     }
 

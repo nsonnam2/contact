@@ -37,4 +37,15 @@ public class Utils {
 
         return listContacts;
     }
+
+    public static boolean check(String text) {
+        for (int i = 0; i < text.length() - 1; i++) {
+            if (((int) text.charAt(i)) > 0 && ((int) text.charAt(i)) < 127) {
+                Log.d(TAG, "check: " + text);
+            } else {
+                return true;
+            }
+        }
+        return false;
+    }
 }
