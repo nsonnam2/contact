@@ -2,11 +2,14 @@ package com.example.contact.activity;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.provider.Settings;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -28,15 +31,22 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager.widget.ViewPager;
 
 import com.example.contact.R;
+import com.example.contact.adapter.ContactAdapter;
 import com.example.contact.adapter.ViewPagerAdapter;
 import com.example.contact.dialog.PermissionDialog;
 import com.example.contact.fragment.ContactFragment;
 import com.example.contact.fragment.EmojiFragment;
+import com.example.contact.model.Contact;
 import com.example.contact.utils.PermissionUtil;
+import com.example.contact.utils.Utils;
 import com.google.android.material.tabs.TabLayout;
+
+import java.util.ArrayList;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -65,6 +75,8 @@ public class MainActivity extends AppCompatActivity {
     ImageView imBack;
     @BindView(R.id.im_close)
     ImageView imClose;
+    private RelativeLayout rlSearch;
+    private RecyclerView rvSearch;
 
     private String[] PERMISSIONS = {Manifest.permission.READ_CONTACTS};
     private boolean isDenyShowAgain = false;
@@ -74,11 +86,10 @@ public class MainActivity extends AppCompatActivity {
     private ViewPagerAdapter viewPagerAdapter;
     private ContactFragment contactFragment = new ContactFragment();
     private EmojiFragment emojiFragment = new EmojiFragment();
-    private Search search;
-
-    public void setSearch(Search search) {
-        this.search = search;
-    }
+    private ArrayList<Contact> listContacts = new ArrayList<>();
+    private ArrayList<Contact> listSearch = new ArrayList<>();
+    private ArrayList<Contact> listEmoji = new ArrayList<>();
+    private ContactAdapter contactAdapter;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -86,27 +97,35 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
+        rlSearch = findViewById(R.id.rl_search);
+        rvSearch = findViewById(R.id.rv_search);
+
         permissionDialog = new PermissionDialog(this);
 
         loadViewSearch(false);
 
         listener();
-        edtSearch.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
-            }
+    }
 
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                search.search(s.toString());
-            }
+    private void initActivity() {
 
-            @Override
-            public void afterTextChanged(Editable s) {
+        Fragment[] fms = {contactFragment, emojiFragment};
 
-            }
-        });
+        viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager(), fms);
+        viewPager.setAdapter(viewPagerAdapter);
+        tabLayout.setupWithViewPager(viewPager);
+
+        contactAdapter = new ContactAdapter();
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
+        rvSearch.setLayoutManager(layoutManager);
+        rvSearch.setAdapter(contactAdapter);
+
+        listContacts.clear();
+        listContacts.addAll(Utils.getContactList(this));
+
+
+
     }
 
     private void listener() {
@@ -134,7 +153,64 @@ public class MainActivity extends AppCompatActivity {
         });
 
         imSearch.setOnClickListener(v -> {
+
             loadViewSearch(true);
+
+            ArrayList<Contact> contacts = new ArrayList<>();
+            contacts.addAll(listContacts);
+
+            for (int i = 0; i < listContacts.size(); i++) {
+                if (Utils.check(listContacts.get(i).getName())){
+                    listEmoji.add(listContacts.get(i));
+                }
+            }
+
+            int frag = tabLayout.getSelectedTabPosition();
+
+            if (frag == 0){
+                contactAdapter.setListContacts(Utils.sort(contacts));
+            }
+
+            if (frag == 1){
+                contactAdapter.setListContacts(Utils.sort(listEmoji));
+            }
+
+            edtSearch.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+                    listSearch.clear();
+                    listEmoji.clear();
+
+
+                    if (frag == 0){
+                        for (int i = 0; i < listContacts.size(); i++) {
+                            if (listContacts.get(i).getName().toLowerCase().contains(s.toString().toLowerCase()) && listContacts.get(i).getType() == Contact.Type.CONTACT){
+                                listSearch.add(listContacts.get(i));
+                            }
+                        }
+                    }
+
+
+                    if (frag == 1){
+                        for (int i = 0; i < listEmoji.size(); i++) {
+                            if (listEmoji.get(i).getName().toLowerCase().contains(s.toString().toLowerCase()) && listEmoji.get(i).getType() == Contact.Type.CONTACT){
+                                listSearch.add(listEmoji.get(i));
+                            }
+                        }
+                    }
+
+                    contactAdapter.setListContacts(Utils.sort(listSearch));
+                    contactAdapter.notifyDataSetChanged();
+                }
+
+                @Override
+                public void afterTextChanged(Editable s) {}
+            });
+
         });
 
         imBack.setOnClickListener(v -> {
@@ -142,7 +218,6 @@ public class MainActivity extends AppCompatActivity {
             clearText(edtSearch);
             InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(edtSearch.getWindowToken(), 0);
-            Log.d(TAG, "listener: ");
         });
 
         imClose.setOnClickListener(v -> clearText(edtSearch));
@@ -157,38 +232,20 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    @Override
-    public void onBackPressed() {
-        if (lnSearch.getVisibility() == View.VISIBLE) {
-            loadViewSearch(false);
-            clearText(edtSearch);
-        }else {
-            finish();
-        }
-    }
-
     private void loadViewSearch(boolean b) {
         if (b) {
             tvAppName.setVisibility(View.GONE);
             imSearch.setVisibility(View.GONE);
             imMenu.setVisibility(View.GONE);
             lnSearch.setVisibility(View.VISIBLE);
+            rlSearch.setVisibility(View.VISIBLE);
         } else {
             tvAppName.setVisibility(View.VISIBLE);
             imSearch.setVisibility(View.VISIBLE);
             imMenu.setVisibility(View.VISIBLE);
             lnSearch.setVisibility(View.GONE);
+            rlSearch.setVisibility(View.GONE);
         }
-    }
-
-    private void initActivity() {
-
-        Fragment[] fms = {contactFragment, emojiFragment};
-
-        viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager(), fms);
-        viewPager.setAdapter(viewPagerAdapter);
-        tabLayout.setupWithViewPager(viewPager);
-
     }
 
     @Override
@@ -259,7 +316,13 @@ public class MainActivity extends AppCompatActivity {
                 REQUEST_CODE_PERMISSION);
     }
 
-    public interface Search {
-        void search(String s);
+    @Override
+    public void onBackPressed() {
+        if (lnSearch.getVisibility() == View.VISIBLE) {
+            loadViewSearch(false);
+            clearText(edtSearch);
+        }else {
+            finish();
+        }
     }
 }

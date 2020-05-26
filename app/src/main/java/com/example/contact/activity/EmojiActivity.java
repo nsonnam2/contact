@@ -1,16 +1,26 @@
 package com.example.contact.activity;
 
+import android.content.ContentProviderOperation;
+import android.content.ContentProviderResult;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.provider.ContactsContract;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.contact.R;
 import com.example.contact.utils.Utils;
+
+import java.util.ArrayList;
 
 import emoji4j.EmojiUtils;
 import io.github.rockerhieu.emojicon.EmojiconEditText;
@@ -36,45 +46,65 @@ public class EmojiActivity extends AppCompatActivity implements EmojiconGridFrag
         getSupportFragmentManager().beginTransaction().commit();
 
         Intent intent = getIntent();
-        id = intent.getStringExtra("id"); // id của danh bạ
+        id = intent.getStringExtra("id");
         name = intent.getStringExtra("name");
 
         textView = findViewById(R.id.txtEmojicon);
         editText = findViewById(R.id.editEmojicon);
         button = findViewById(R.id.btn_save);
 
+        textView.setText(name);
         editText.setText(name);
-        editText.requestFocus();
         editText.setCursorVisible(false);
+        editText.onEditorAction(EditorInfo.IME_ACTION_DONE);
+        focusRight();
 
+        editText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                textView.setText(s.toString());
+                focusRight();
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
 
         button.setOnClickListener(v -> {
-            // nút đổi tên
-            update(editText.getText().toString(), id);
-            Log.d(TAG, "onCreate: " + id);
+            updateContact(id, editText.getText().toString());
             finish();
         });
-    }
-
-    private void update(String newName, String id) {
-        // TODO: 5/26/2020 viết code đổi tên ở đây
 
     }
+
+    private void updateContact( String id, String name){
+        // TODO: 5/26/2020 change name of contacts
+
+    }
+
 
     @Override
     public void onEmojiconClicked(Emojicon emojicon) {
         EmojiconsFragment.input(editText, emojicon);
-
     }
 
     @Override
     public void onEmojiconBackspaceClicked(View v) {
-        String text = editText.getText().toString();
-       if (Utils.check(text)){
+       if (Utils.check(editText.getText().toString())){
            EmojiconsFragment.backspace(editText);
-       }else {
-           Log.d(TAG, "onEmojiconBackspaceClicked: ");
        }
+    }
+
+    private void focusRight(){
+        int pos = editText.getText().length();
+        editText.setSelection(pos);
     }
 
 }

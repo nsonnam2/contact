@@ -6,92 +6,117 @@
     android:layout_height="match_parent"
     tools:context=".activity.MainActivity">
 
-   <RelativeLayout
-       android:id="@+id/rl_actionBar"
-       android:layout_width="match_parent"
-       android:layout_height="70dp"
-       android:background="#0373fc">
+    <RelativeLayout
+        android:id="@+id/rl_actionBar"
+        android:layout_width="match_parent"
+        android:layout_height="70dp"
+        android:background="#0373fc">
+
         <TextView
             android:id="@+id/tv_app_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="16dp"
             android:text="Emoji Contact Manager"
             android:textColor="#FFF"
-            android:textSize="20dp"
-            android:layout_centerVertical="true"
-            android:layout_marginStart="16dp"/>
-       <LinearLayout
-           android:layout_width="70dp"
-           android:layout_height="match_parent"
-           android:id="@+id/im_menu"
-           android:layout_alignParentEnd="true"
-           android:orientation="vertical"
-           android:gravity="center">
-           <ImageView
-               android:layout_width="30dp"
-               android:layout_height="match_parent"
-               android:tint="#fff"
-               android:src="@drawable/menu"/>
-       </LinearLayout>
-       <LinearLayout
-           android:layout_width="70dp"
-           android:layout_height="match_parent"
-           android:id="@+id/im_search"
-           android:layout_toStartOf="@+id/im_menu"
-           android:orientation="vertical"
-           android:gravity="center">
-           <ImageView
-               android:layout_width="30dp"
-               android:layout_height="match_parent"
-               android:tint="#fff"
-               android:src="@drawable/search"/>
-       </LinearLayout>
-       <RelativeLayout
-           android:id="@+id/ln_search"
-           android:layout_width="match_parent"
-           android:layout_height="match_parent"
-           android:gravity="center_vertical"
-           android:padding="16dp">
-           <ImageView
-               android:layout_width="30dp"
-               android:layout_height="30dp"
-               android:id="@+id/im_back"
-               android:src="@drawable/back"
-               android:tint="#fff"/>
+            android:textSize="20dp" />
 
-           <EditText
-               android:id="@+id/edt_search"
-               android:layout_width="match_parent"
-               android:layout_height="wrap_content"
-               android:hint="Search..."
-               android:textColorHint="#fff"
+        <LinearLayout
+            android:id="@+id/im_menu"
+            android:layout_width="70dp"
+            android:layout_height="match_parent"
+            android:layout_alignParentEnd="true"
+            android:gravity="center"
+            android:orientation="vertical">
 
-               android:textSize="16sp"
-               android:textColor="#fff"
-               android:layout_toLeftOf="@+id/im_close"
-               android:layout_toRightOf="@+id/im_back"/>
-           <ImageView
-               android:layout_width="30dp"
-               android:layout_height="30dp"
-               android:id="@+id/im_close"
-               android:src="@drawable/close"
-               android:tint="#fff"
-               android:layout_alignParentEnd="true"/>
-       </RelativeLayout>
-   </RelativeLayout>
+            <ImageView
+                android:layout_width="30dp"
+                android:layout_height="match_parent"
+                android:src="@drawable/menu"
+                android:tint="#fff" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/im_search"
+            android:layout_width="70dp"
+            android:layout_height="match_parent"
+            android:layout_toStartOf="@+id/im_menu"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <ImageView
+                android:layout_width="30dp"
+                android:layout_height="match_parent"
+                android:src="@drawable/search"
+                android:tint="#fff" />
+        </LinearLayout>
+
+        <RelativeLayout
+            android:id="@+id/ln_search"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:padding="16dp">
+
+            <ImageView
+                android:id="@+id/im_back"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:src="@drawable/back"
+                android:tint="#fff" />
+
+            <EditText
+                android:id="@+id/edt_search"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_toLeftOf="@+id/im_close"
+                android:layout_toRightOf="@+id/im_back"
+
+                android:hint="Search..."
+                android:textColor="#fff"
+                android:textColorHint="#fff"
+                android:textSize="16sp"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"/>
+
+            <ImageView
+                android:id="@+id/im_close"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_alignParentEnd="true"
+                android:src="@drawable/close"
+                android:tint="#fff" />
+        </RelativeLayout>
+    </RelativeLayout>
 
     <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tabLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/tabLayout"
         android:layout_below="@+id/rl_actionBar"
         android:background="#0373fc"
-        app:tabTextColor="#fff"/>
+        app:tabTextColor="#fff" />
 
     <androidx.viewpager.widget.ViewPager
+        android:id="@+id/viewPager"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/viewPager"
-        android:layout_below="@+id/tabLayout"/>
+        android:layout_below="@+id/tabLayout" />
+
+    <RelativeLayout
+        android:id="@+id/rl_search"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/rl_actionBar"
+        android:background="#fff"
+        android:padding="15dp">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_search"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+    </RelativeLayout>
 
 </RelativeLayout>
