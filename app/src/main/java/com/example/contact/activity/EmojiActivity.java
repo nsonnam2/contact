@@ -1,11 +1,21 @@
 package com.example.contact.activity;
 
+import android.Manifest;
+import android.accounts.AccountManager;
 import android.content.ContentProviderOperation;
 import android.content.ContentProviderResult;
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.OperationApplicationException;
+import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.RemoteException;
 import android.provider.ContactsContract;
+import android.provider.Settings;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -14,10 +24,15 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import com.example.contact.R;
+import com.example.contact.dialog.PermissionDialog;
+import com.example.contact.utils.PermissionUtil;
 import com.example.contact.utils.Utils;
 
 import java.util.ArrayList;
@@ -37,13 +52,19 @@ public class EmojiActivity extends AppCompatActivity implements EmojiconGridFrag
     private Button button;
     private String id = "";
     private String name = "";
+    private String[] PERMISSIONS = {Manifest.permission.WRITE_CONTACTS};
+    private boolean isDenyShowAgain = false;
+    private static final int REQUEST_CODE_PERMISSION = 1;
+    private PermissionDialog permissionDialog;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_emoji);
 
+
         getSupportFragmentManager().beginTransaction().commit();
+        permissionDialog = new PermissionDialog(this);
 
         Intent intent = getIntent();
         id = intent.getStringExtra("id");
@@ -78,14 +99,40 @@ public class EmojiActivity extends AppCompatActivity implements EmojiconGridFrag
         });
 
         button.setOnClickListener(v -> {
-            updateContact(id, editText.getText().toString());
-            finish();
+            if (isGranted(PERMISSIONS[0])) {
+                String name = textView.getText().toString();
+                if (name.isEmpty()){
+                    Toast.makeText(EmojiActivity.this, "name is empty", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                updateContact(id, textView.getText().toString());
+                finish();
+            } else {
+                permissionDialog.show();
+                permissionDialog.setTextPermission("Allows permission to write your contacts");
+                permissionDialog.setDialogClick(new PermissionDialog.DialogClick() {
+                    @Override
+                    public void allow() {
+                        if (isDenyShowAgain) {
+                            Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                            Uri uri = Uri.fromParts("package", getPackageName(), null);
+                            intent.setData(uri);
+                            startActivity(intent);
+                        } else {
+                            showPermission(PERMISSIONS[0]);
+                        }
+                        if (permissionDialog.isShowing()) {
+                            permissionDialog.dismiss();
+                        }
+                    }
+
+                    @Override
+                    public void deny() {
+                        permissionDialog.dismiss();
+                    }
+                });
+            }
         });
-
-    }
-
-    private void updateContact( String id, String name){
-        // TODO: 5/26/2020 change name of contacts
 
     }
 
@@ -97,14 +144,68 @@ public class EmojiActivity extends AppCompatActivity implements EmojiconGridFrag
 
     @Override
     public void onEmojiconBackspaceClicked(View v) {
-       if (Utils.check(editText.getText().toString())){
-           EmojiconsFragment.backspace(editText);
-       }
+        if (!editText.getText().toString().isEmpty()) {
+            EmojiconsFragment.backspace(editText);
+        }
+
     }
 
-    private void focusRight(){
+    private void focusRight() {
         int pos = editText.getText().length();
         editText.setSelection(pos);
     }
 
+    private boolean isGranted(String permission) {
+        return PermissionUtil.checkPermission(this, permission);
+    }
+
+    private void showPermission(String permission) {
+        ActivityCompat.requestPermissions(
+                this,
+                new String[]{permission},
+                REQUEST_CODE_PERMISSION);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQUEST_CODE_PERMISSION) {
+            for (int i = 0; i < permissions.length; i++) {
+                if (grantResults[i] == PackageManager.PERMISSION_DENIED) {
+                    if (PermissionUtil.isMarshmallow()) {
+                        if (shouldShowRequestPermissionRationale(permissions[i])) {
+                            isDenyShowAgain = false;
+                            permissionDialog.setTextButton("Allow");
+                        } else {
+                            isDenyShowAgain = true;
+                            permissionDialog.setTextButton("Go to settings");
+                        }
+                    }
+                } else {
+                    updateContact(id, textView.getText().toString());
+                }
+            }
+        }
+    }
+
+    private void updateContact(String id, String name) {
+        try {
+            ContentResolver contentResolver = EmojiActivity.this.getContentResolver();
+
+            String where = ContactsContract.Data.CONTACT_ID + " = ? AND " + ContactsContract.Data.MIMETYPE + " = ?";
+
+            String[] nameParams = new String[]{id, ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE};
+
+            ArrayList<android.content.ContentProviderOperation> ops = new ArrayList<>();
+
+            ops.add(android.content.ContentProviderOperation.newUpdate(android.provider.ContactsContract.Data.CONTENT_URI)
+                    .withSelection(where, nameParams)
+                    .withValue(ContactsContract.CommonDataKinds.StructuredName.DISPLAY_NAME, name)
+                    .build());
+
+            contentResolver.applyBatch(ContactsContract.AUTHORITY, ops);
+        } catch (OperationApplicationException | RemoteException e) {
+            e.printStackTrace();
+        }
+    }
 }

@@ -1,15 +1,22 @@
 package com.example.contact.utils;
 
 import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.content.Context;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.provider.ContactsContract;
 import android.util.Log;
 
 import com.example.contact.model.Contact;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Utils {
 
@@ -17,31 +24,39 @@ public class Utils {
 
     public static ArrayList<Contact> getContactList(Context context) {
         ArrayList<Contact> list = new ArrayList<>();
-        ContentResolver cr = context.getContentResolver();
-        Cursor cur = cr.query(ContactsContract.Contacts.CONTENT_URI, null, null, null, null);
+        ContentResolver contentResolver = context.getContentResolver();
+        Cursor cursor = contentResolver.query(ContactsContract.Contacts.CONTENT_URI, null, null, null, null);
 
-        if ((cur != null ? cur.getCount() : 0) > 0) {
-            while (cur != null && cur.moveToNext()) {
-                String id = cur.getString(cur.getColumnIndex(ContactsContract.Contacts._ID));
-                String name = cur.getString(cur.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
+        if (cursor.getCount() > 0) {
+            while (cursor.moveToNext()) {
+                String id = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts._ID));
+                if (cursor.getInt(cursor.getColumnIndex(ContactsContract.Contacts.HAS_PHONE_NUMBER)) > 0) {
+                    Cursor cursorInfo = contentResolver.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null,
+                            ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = ?", new String[]{id}, null);
+                    InputStream inputStream = ContactsContract.Contacts.openContactPhotoInputStream(context.getContentResolver(),
+                            ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, new Long(id)));
 
-                if (cur.getInt(cur.getColumnIndex(ContactsContract.Contacts.HAS_PHONE_NUMBER)) > 0) {
-                    Cursor pCur = cr.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
-                            null,
-                            ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = ?",
-                            new String[]{id},
-                            null);
-                    while (pCur.moveToNext()) {
-                        String phoneNo = pCur.getString(pCur.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
+                    Uri person = ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, new Long(id));
+                    Uri pURI = Uri.withAppendedPath(person, ContactsContract.Contacts.Photo.CONTENT_DIRECTORY);
+
+                    Bitmap photo = null;
+                    if (inputStream != null) {
+                        photo = BitmapFactory.decodeStream(inputStream);
+                    }
+                    while (cursorInfo.moveToNext()) {
+                        String name = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
                         Contact contact = new Contact(id, name, Contact.Type.CONTACT, false);
+
                         list.add(contact);
                     }
-                    pCur.close();
+
+                    cursorInfo.close();
                 }
             }
+            cursor.close();
         }
-        if (cur != null) {
-            cur.close();
+        if (cursor != null) {
+            cursor.close();
         }
 
         return list;
@@ -75,12 +90,10 @@ public class Utils {
     }
 
     public static boolean check(String text) {
-        for (int i = 0; i < text.length() - 1; i++) {
-            if (((int) text.charAt(i)) > 0 && ((int) text.charAt(i)) < 127) {
-                Log.d(TAG, "check: " + text);
-            } else {
-                return true;
-            }
+        String regex = "([\\u20a0-\\u32ff\\ud83c\\udc00-\\ud83d\\udeff\\udbb9\\udce5-\\udbb9\\udcee])";
+        Matcher matchEmo = Pattern.compile(regex).matcher(text);
+        while (matchEmo.find()) {
+            return true;
         }
         return false;
     }

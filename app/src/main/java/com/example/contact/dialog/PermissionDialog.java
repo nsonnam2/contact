@@ -45,6 +45,9 @@ public class PermissionDialog extends Dialog {
 
         btnDeny.setOnClickListener(v -> dialogClick.deny());
     }
+    public void setTextPermission(String s){
+        tvPermissionText.setText(s);
+    }
 
     public void setTextButton(String s){
         btnAllow.setText(s);

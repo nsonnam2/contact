@@ -90,6 +90,8 @@ public class MainActivity extends AppCompatActivity {
     private ArrayList<Contact> listSearch = new ArrayList<>();
     private ArrayList<Contact> listEmoji = new ArrayList<>();
     private ContactAdapter contactAdapter;
+    int tabPosition = -1;
+    private String textSearch = "";
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -110,6 +112,17 @@ public class MainActivity extends AppCompatActivity {
 
     private void initActivity() {
 
+        listContacts.clear();
+        listEmoji.clear();
+
+        listContacts.addAll(Utils.getContactList(this));
+
+        for (int i = 0; i < listContacts.size(); i++) {
+            if (Utils.check(listContacts.get(i).getName())) {
+                listEmoji.add(listContacts.get(i));
+            }
+        }
+
         Fragment[] fms = {contactFragment, emojiFragment};
 
         viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager(), fms);
@@ -121,11 +134,12 @@ public class MainActivity extends AppCompatActivity {
         rvSearch.setLayoutManager(layoutManager);
         rvSearch.setAdapter(contactAdapter);
 
-        listContacts.clear();
-        listContacts.addAll(Utils.getContactList(this));
-
-
-
+        contactAdapter.setListener(contact -> {
+            Intent intent = new Intent(MainActivity.this, EmojiActivity.class);
+            intent.putExtra("name", contact.getName());
+            intent.putExtra("id", contact.getId());
+            startActivity(intent);
+        });
     }
 
     private void listener() {
@@ -156,54 +170,48 @@ public class MainActivity extends AppCompatActivity {
 
             loadViewSearch(true);
 
-            ArrayList<Contact> contacts = new ArrayList<>();
-            contacts.addAll(listContacts);
-
-            for (int i = 0; i < listContacts.size(); i++) {
-                if (Utils.check(listContacts.get(i).getName())){
-                    listEmoji.add(listContacts.get(i));
-                }
-            }
-
             int frag = tabLayout.getSelectedTabPosition();
 
-            if (frag == 0){
-                contactAdapter.setListContacts(Utils.sort(contacts));
+            listSearch.clear();
+
+            if (frag == 0) {
+                listSearch.addAll(listContacts);
+                contactAdapter.setListContacts(Utils.sort(listSearch));
             }
 
-            if (frag == 1){
-                contactAdapter.setListContacts(Utils.sort(listEmoji));
+            if (frag == 1) {
+                listSearch.addAll(listEmoji);
+                contactAdapter.setListContacts(Utils.sort(listSearch));
             }
 
             edtSearch.addTextChangedListener(new TextWatcher() {
                 @Override
-                public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
                 @Override
                 public void onTextChanged(CharSequence s, int start, int before, int count) {
 
-                    listSearch.clear();
-                    listEmoji.clear();
+                    textSearch = s.toString();
 
+                    ArrayList<Contact> rs = new ArrayList<>();
 
-                    if (frag == 0){
+                    if (frag == 0) {
                         for (int i = 0; i < listContacts.size(); i++) {
-                            if (listContacts.get(i).getName().toLowerCase().contains(s.toString().toLowerCase()) && listContacts.get(i).getType() == Contact.Type.CONTACT){
-                                listSearch.add(listContacts.get(i));
+                            if (listContacts.get(i).getName().toLowerCase().contains(s.toString().toLowerCase()) && listContacts.get(i).getType() == Contact.Type.CONTACT) {
+                                rs.add(listContacts.get(i));
                             }
                         }
                     }
 
-
-                    if (frag == 1){
+                    if (frag == 1) {
                         for (int i = 0; i < listEmoji.size(); i++) {
-                            if (listEmoji.get(i).getName().toLowerCase().contains(s.toString().toLowerCase()) && listEmoji.get(i).getType() == Contact.Type.CONTACT){
-                                listSearch.add(listEmoji.get(i));
+                            if (listEmoji.get(i).getName().toLowerCase().contains(s.toString().toLowerCase()) && listEmoji.get(i).getType() == Contact.Type.CONTACT) {
+                                rs.add(listEmoji.get(i));
                             }
                         }
                     }
 
-                    contactAdapter.setListContacts(Utils.sort(listSearch));
+                    contactAdapter.setListContacts(Utils.sort(rs));
                     contactAdapter.notifyDataSetChanged();
                 }
 
@@ -223,6 +231,7 @@ public class MainActivity extends AppCompatActivity {
         imClose.setOnClickListener(v -> clearText(edtSearch));
 
     }
+
 
     private void clearText(EditText editText) {
         if (editText.getText().toString().isEmpty()) {
@@ -251,36 +260,74 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        for (String s : PERMISSIONS) {
-            if (isGranted(s)) {
-                if (permissionDialog.isShowing()) {
-                    permissionDialog.dismiss();
-                }
-                initActivity();
-            } else {
-                permissionDialog.show();
-                permissionDialog.setDialogClick(new PermissionDialog.DialogClick() {
-                    @Override
-                    public void allow() {
-                        if (isDenyShowAgain) {
-                            Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-                            Uri uri = Uri.fromParts("package", getPackageName(), null);
-                            intent.setData(uri);
-                            startActivity(intent);
-                        } else {
-                            showPermission(PERMISSIONS[0]);
+        if (isGranted(PERMISSIONS[0])) {
+            initActivity();
+            ArrayList<Contact> list = new ArrayList<>();
+
+            if (rvSearch.getVisibility() == View.VISIBLE){
+                if (textSearch.isEmpty()){
+                    if (tabPosition == 0){
+                        list.addAll(listContacts);
+                    }
+                    if (tabPosition == 1){
+                        list.addAll(listEmoji);
+                    }
+                }else {
+                    if (tabPosition == 0) {
+                        for (int i = 0; i < listContacts.size(); i++) {
+                            if (listContacts.get(i).getName().toLowerCase().contains(textSearch.toLowerCase()) && listContacts.get(i).getType() == Contact.Type.CONTACT) {
+                                list.add(listContacts.get(i));
+                            }
                         }
                     }
-
-                    @Override
-                    public void deny() {
-                        finish();
+                    if (tabPosition == 1) {
+                        for (int i = 0; i < listEmoji.size(); i++) {
+                            if (listEmoji.get(i).getName().toLowerCase().contains(textSearch.toLowerCase()) && listEmoji.get(i).getType() == Contact.Type.CONTACT) {
+                                list.add(listEmoji.get(i));
+                            }
+                        }
                     }
-                });
+                }
+
+                contactAdapter.setListContacts(Utils.sort(list));
+                contactAdapter.notifyDataSetChanged();
             }
+        } else {
+            permissionDialog.show();
+            permissionDialog.setTextPermission("Allows permission to read your contacts");
+            permissionDialog.setDialogClick(new PermissionDialog.DialogClick() {
+                @Override
+                public void allow() {
+                    if (isDenyShowAgain) {
+                        Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                        Uri uri = Uri.fromParts("package", getPackageName(), null);
+                        intent.setData(uri);
+                        startActivity(intent);
+                    } else {
+                        showPermission(PERMISSIONS[0]);
+                    }
+                    if (permissionDialog.isShowing()) {
+                        permissionDialog.dismiss();
+                    }
+                }
+
+                @Override
+                public void deny() {
+                    finish();
+                }
+            });
 
         }
 
+        if (tabPosition > 0){
+          tabLayout.getTabAt(tabPosition).select();
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        tabPosition = tabLayout.getSelectedTabPosition();
     }
 
     @Override
@@ -321,7 +368,7 @@ public class MainActivity extends AppCompatActivity {
         if (lnSearch.getVisibility() == View.VISIBLE) {
             loadViewSearch(false);
             clearText(edtSearch);
-        }else {
+        } else {
             finish();
         }
     }
