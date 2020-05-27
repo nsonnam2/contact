@@ -3,4 +3,5 @@
     <color name="colorPrimary">#0373fc</color>
     <color name="colorPrimaryDark">#0373fc</color>
     <color name="colorAccent">#0373fc</color>
+    <color name="tablayout_unselected">#0373fc</color>
 </resources>

@@ -95,7 +95,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/rl_actionBar"
-        android:background="#0373fc"
+        app:tabBackground="@drawable/bg_tab_layout"
         app:tabTextColor="#fff" />
 
     <androidx.viewpager.widget.ViewPager

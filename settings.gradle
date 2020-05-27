@@ -1,2 +1,2 @@
 rootProject.name='contact'
-include ':app'
+include ':app', ':library'
