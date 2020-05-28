@@ -17,6 +17,7 @@ import com.example.contact.activity.EmojiActivity;
 import com.example.contact.activity.MainActivity;
 import com.example.contact.adapter.AlphabetAdapter;
 import com.example.contact.adapter.ContactAdapter;
+import com.example.contact.asyntask.ReadFIle;
 import com.example.contact.interfaces.Key;
 import com.example.contact.model.Contact;
 import com.example.contact.utils.Utils;
@@ -83,16 +84,30 @@ public class EmojiFragment extends BaseFragment {
     @Override
     public void onResume() {
         super.onResume();
-        listContacts.clear();
-        listContacts.addAll(Utils.getContactList(getContext()));
 
-        listEmoji.clear();
-        for (int i = 0; i < listContacts.size(); i++) {
-            if (Utils.check(listContacts.get(i).getName())) {
-                listEmoji.add(listContacts.get(i));
+        ReadFIle readFIle = new ReadFIle(new ReadFIle.CallBack() {
+            @Override
+            public void onPreExecute() {
+
             }
-        }
 
-        contactAdapter.setListContacts(Utils.sort(listEmoji));
+            @Override
+            public void onPostExecute(ArrayList<Contact> list) {
+                listContacts.clear();
+                listContacts.addAll(list);
+
+                listEmoji.clear();
+                for (int i = 0; i < listContacts.size(); i++) {
+                    if (Utils.check(listContacts.get(i).getName())) {
+                        listEmoji.add(listContacts.get(i));
+                    }
+                }
+
+                contactAdapter.setListContacts(Utils.sort(listEmoji));
+                contactAdapter.notifyDataSetChanged();
+            }
+        });
+
+        readFIle.execute(getContext());
     }
 }

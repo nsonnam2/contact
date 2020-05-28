@@ -2,6 +2,7 @@ package com.example.contact.activity;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -13,6 +14,7 @@ import android.text.TextWatcher;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -42,6 +44,7 @@ public class EmojiActivity extends BaseActivity implements EmojiconGridFragment.
     private static final int REQUEST_CODE_PERMISSION = 1;
     private PermissionDialog permissionDialog;
     private Load load;
+    private ProgressBar dialog;
 
     @Override
     protected int LayoutRes() {
@@ -59,6 +62,8 @@ public class EmojiActivity extends BaseActivity implements EmojiconGridFragment.
             load = new Load(EmojiActivity.this);
             load.execute();
         }, 100);
+
+        dialog = findViewById(R.id.pb_load);
 
         permissionDialog = new PermissionDialog(this);
 
@@ -195,6 +200,7 @@ public class EmojiActivity extends BaseActivity implements EmojiconGridFragment.
         @Override
         protected void onPostExecute(Void aVoid) {
             editText.setVisibility(View.VISIBLE);
+            dialog.setVisibility(View.GONE);
         }
     }
 }
