@@ -1,15 +1,21 @@
 package com.example.contact.utils;
 
+import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Context;
+import android.content.OperationApplicationException;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.RemoteException;
 import android.provider.ContactsContract;
 import android.util.Log;
 
+import androidx.core.app.ActivityCompat;
+
+import com.example.contact.activity.EmojiActivity;
 import com.example.contact.model.Contact;
 
 import java.io.InputStream;
@@ -45,7 +51,7 @@ public class Utils {
                     }
                     while (cursorInfo.moveToNext()) {
                         String name = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
-                        Contact contact = new Contact(id, name, Contact.Type.CONTACT, false);
+                        Contact contact = new Contact(id, name, 0, false);
 
                         list.add(contact);
                     }
@@ -66,21 +72,21 @@ public class Utils {
         if (listContacts.size() > 0){
             Collections.sort(listContacts, (o1, o2) -> o1.getName().compareToIgnoreCase(o2.getName()));
 
-            Contact contact = new Contact("", listContacts.get(0).getName().substring(0, 1), Contact.Type.TITLE, false);
+            Contact contact = new Contact("", listContacts.get(0).getName().substring(0, 1), 1 ,false);
             listContacts.add(0, contact);
 
             for (int i = 0; i < listContacts.size(); i++) {
 
                 if (listContacts.indexOf(listContacts.get(i)) == listContacts.size() - 1) {
                     if (!listContacts.get(i).getName().substring(0, 1).equals(listContacts.get(i - 1).getName().substring(0, 1))) {
-                        Contact contact1 = new Contact("", listContacts.get(i).getName().substring(0, 1), Contact.Type.TITLE, false);
+                        Contact contact1 = new Contact("", listContacts.get(i).getName().substring(0, 1), 1, false);
                         listContacts.add(listContacts.indexOf(listContacts.get(i - 1)), contact1);
                     }
                     return listContacts;
                 }
 
                 if (!listContacts.get(i).getName().substring(0, 1).equals(listContacts.get(i + 1).getName().substring(0, 1))) {
-                    Contact contact1 = new Contact("", listContacts.get(i + 1).getName().substring(0, 1), Contact.Type.TITLE, false);
+                    Contact contact1 = new Contact("", listContacts.get(i + 1).getName().substring(0, 1), 1, false);
                     listContacts.add(listContacts.indexOf(listContacts.get(i + 1)), contact1);
                 }
             }
@@ -96,5 +102,36 @@ public class Utils {
             return true;
         }
         return false;
+    }
+
+    public static void updateContact(Context context, String id, String name) {
+        try {
+            ContentResolver contentResolver = context.getContentResolver();
+
+            String where = ContactsContract.Data.CONTACT_ID + " = ? AND " + ContactsContract.Data.MIMETYPE + " = ?";
+
+            String[] nameParams = new String[]{id, ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE};
+
+            ArrayList<android.content.ContentProviderOperation> ops = new ArrayList<>();
+
+            ops.add(android.content.ContentProviderOperation.newUpdate(android.provider.ContactsContract.Data.CONTENT_URI)
+                    .withSelection(where, nameParams)
+                    .withValue(ContactsContract.CommonDataKinds.StructuredName.DISPLAY_NAME, name)
+                    .build());
+
+            contentResolver.applyBatch(ContactsContract.AUTHORITY, ops);
+        } catch (OperationApplicationException | RemoteException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static int getIndex(String text, ArrayList<Contact> list){
+        for (int i = 0; i < list.size(); i++) {
+            if (list.get(i).getName().toLowerCase().startsWith(text.toLowerCase()) && list.get(i).getType() == 0){
+                return list.indexOf(list.get(i));
+            }
+        }
+
+        return -1;
     }
 }

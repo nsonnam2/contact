@@ -30,6 +30,7 @@ public class EmojiFragment extends Fragment {
     private ArrayList<Contact> listContacts = new ArrayList<>();
     private ArrayList<Contact> listEmoji = new ArrayList<>();
     private ArrayList<Contact> listAlphabet = new ArrayList<>();
+    private ContactAdapter contactAdapter;
 
     @Nullable
     @Override
@@ -45,23 +46,10 @@ public class EmojiFragment extends Fragment {
         rvContacts = getActivity().findViewById(R.id.rv_contact_emoji);
         rvAlphabet = getActivity().findViewById(R.id.rv_alphabet_emoji);
 
-        ContactAdapter contactAdapter = new ContactAdapter();
+        contactAdapter = new ContactAdapter();
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getContext());
         rvContacts.setLayoutManager(layoutManager);
         rvContacts.setAdapter(contactAdapter);
-
-        listContacts.clear();
-        listContacts.addAll(Utils.getContactList(getContext()));
-
-
-        listEmoji.clear();
-        for (int i = 0; i < listContacts.size(); i++) {
-            if (Utils.check(listContacts.get(i).getName())){
-                listEmoji.add(listContacts.get(i));
-            }
-        }
-
-        contactAdapter.setListContacts(Utils.sort(listEmoji));
 
         contactAdapter.setListener(contact -> {
             Intent intent = new Intent(getContext(), EmojiActivity.class);
@@ -76,35 +64,35 @@ public class EmojiFragment extends Fragment {
 
         listAlphabet.clear();
         for (int i = 0; i < listEmoji.size(); i++) {
-            if (listEmoji.get(i).getType() == Contact.Type.TITLE){
+            if (listEmoji.get(i).getType() == 1){
                 listAlphabet.add(listEmoji.get(i));
             }
         }
 
         alphabetAdapter.setList(listAlphabet);
 
-        alphabetAdapter.setListener(new AlphabetAdapter.Listener() {
-            @Override
-            public void itemClick(Contact contact) {
-                String text = contact.getName();
-                int index = getIndex(text, listEmoji);
-                if (index > 0){
-                    rvContacts.scrollToPosition(index);
-                }
+        alphabetAdapter.setListener(contact -> {
+            String text = contact.getName();
+            int index = Utils.getIndex(text, listEmoji);
+            if (index > 0){
+                rvContacts.scrollToPosition(index);
             }
         });
-
-
     }
 
-    private int getIndex(String text, ArrayList<Contact> list){
-        for (int i = 0; i < list.size(); i++) {
-            if (list.get(i).getName().toLowerCase().startsWith(text.toLowerCase()) && list.get(i).getType() == Contact.Type.CONTACT){
-                return list.indexOf(list.get(i));
+    @Override
+    public void onResume() {
+        super.onResume();
+        listContacts.clear();
+        listContacts.addAll(Utils.getContactList(getContext()));
+
+        listEmoji.clear();
+        for (int i = 0; i < listContacts.size(); i++) {
+            if (Utils.check(listContacts.get(i).getName())){
+                listEmoji.add(listContacts.get(i));
             }
         }
 
-        return -1;
+        contactAdapter.setListContacts(Utils.sort(listEmoji));
     }
-
 }

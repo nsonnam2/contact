@@ -2,6 +2,7 @@ package com.example.contact.activity;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -38,6 +39,7 @@ import androidx.viewpager.widget.ViewPager;
 import com.example.contact.R;
 import com.example.contact.adapter.ContactAdapter;
 import com.example.contact.adapter.ViewPagerAdapter;
+import com.example.contact.asyntask.ReadFIle;
 import com.example.contact.dialog.PermissionDialog;
 import com.example.contact.fragment.ContactFragment;
 import com.example.contact.fragment.EmojiFragment;
@@ -92,6 +94,7 @@ public class MainActivity extends AppCompatActivity {
     private ContactAdapter contactAdapter;
     int tabPosition = -1;
     private String textSearch = "";
+    private boolean check = false;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -108,38 +111,53 @@ public class MainActivity extends AppCompatActivity {
 
         listener();
 
-    }
-
-    private void initActivity() {
-
-        listContacts.clear();
-        listEmoji.clear();
-
-        listContacts.addAll(Utils.getContactList(this));
-
-        for (int i = 0; i < listContacts.size(); i++) {
-            if (Utils.check(listContacts.get(i).getName())) {
-                listEmoji.add(listContacts.get(i));
-            }
-        }
-
-        Fragment[] fms = {contactFragment, emojiFragment};
-
-        viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager(), fms);
-        viewPager.setAdapter(viewPagerAdapter);
-        tabLayout.setupWithViewPager(viewPager);
-
         contactAdapter = new ContactAdapter();
-        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(MainActivity.this);
         rvSearch.setLayoutManager(layoutManager);
         rvSearch.setAdapter(contactAdapter);
 
-        contactAdapter.setListener(contact -> {
-            Intent intent = new Intent(MainActivity.this, EmojiActivity.class);
-            intent.putExtra("name", contact.getName());
-            intent.putExtra("id", contact.getId());
-            startActivity(intent);
+    }
+
+    private void readContact(){
+        ReadFIle readFIle = new ReadFIle(new ReadFIle.CallBack() {
+            @Override
+            public void onPreExecute() {
+
+            }
+
+            @Override
+            public void onPostExecute(ArrayList<Contact> list) {
+                listContacts.clear();
+                listEmoji.clear();
+
+                listContacts.addAll(list);
+
+                for (int i = 0; i < listContacts.size(); i++) {
+                    if (Utils.check(listContacts.get(i).getName())) {
+                        listEmoji.add(listContacts.get(i));
+                    }
+                }
+
+                if (!check){
+                    Fragment[] fms = {contactFragment, emojiFragment};
+                    viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager(), fms);
+                    viewPager.setAdapter(viewPagerAdapter);
+                    tabLayout.setupWithViewPager(viewPager);
+                }
+
+                check = true;
+
+                contactAdapter.setListener(contact -> {
+                    Intent intent = new Intent(MainActivity.this, EmojiActivity.class);
+                    intent.putExtra("name", contact.getName());
+                    intent.putExtra("id", contact.getId());
+                    startActivity(intent);
+                });
+
+            }
         });
+
+        readFIle.execute(MainActivity.this);
     }
 
     private void listener() {
@@ -197,7 +215,7 @@ public class MainActivity extends AppCompatActivity {
 
                     if (frag == 0) {
                         for (int i = 0; i < listContacts.size(); i++) {
-                            if (listContacts.get(i).getName().toLowerCase().contains(s.toString().toLowerCase()) && listContacts.get(i).getType() == Contact.Type.CONTACT) {
+                            if (listContacts.get(i).getName().toLowerCase().contains(s.toString().toLowerCase()) && listContacts.get(i).getType() == 0) {
                                 rs.add(listContacts.get(i));
                             }
                         }
@@ -205,7 +223,7 @@ public class MainActivity extends AppCompatActivity {
 
                     if (frag == 1) {
                         for (int i = 0; i < listEmoji.size(); i++) {
-                            if (listEmoji.get(i).getName().toLowerCase().contains(s.toString().toLowerCase()) && listEmoji.get(i).getType() == Contact.Type.CONTACT) {
+                            if (listEmoji.get(i).getName().toLowerCase().contains(s.toString().toLowerCase()) && listEmoji.get(i).getType() == 0) {
                                 rs.add(listEmoji.get(i));
                             }
                         }
@@ -260,8 +278,10 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        if (isGranted(PERMISSIONS[0])) {
-            initActivity();
+        if (PermissionUtil.isGranted(MainActivity.this,PERMISSIONS[0])) {
+
+            readContact();
+
             ArrayList<Contact> list = new ArrayList<>();
 
             if (rvSearch.getVisibility() == View.VISIBLE){
@@ -275,14 +295,14 @@ public class MainActivity extends AppCompatActivity {
                 }else {
                     if (tabPosition == 0) {
                         for (int i = 0; i < listContacts.size(); i++) {
-                            if (listContacts.get(i).getName().toLowerCase().contains(textSearch.toLowerCase()) && listContacts.get(i).getType() == Contact.Type.CONTACT) {
+                            if (listContacts.get(i).getName().toLowerCase().contains(textSearch.toLowerCase()) && listContacts.get(i).getType() == 0) {
                                 list.add(listContacts.get(i));
                             }
                         }
                     }
                     if (tabPosition == 1) {
                         for (int i = 0; i < listEmoji.size(); i++) {
-                            if (listEmoji.get(i).getName().toLowerCase().contains(textSearch.toLowerCase()) && listEmoji.get(i).getType() == Contact.Type.CONTACT) {
+                            if (listEmoji.get(i).getName().toLowerCase().contains(textSearch.toLowerCase()) && listEmoji.get(i).getType() == 0) {
                                 list.add(listEmoji.get(i));
                             }
                         }
@@ -304,7 +324,7 @@ public class MainActivity extends AppCompatActivity {
                         intent.setData(uri);
                         startActivity(intent);
                     } else {
-                        showPermission(PERMISSIONS[0]);
+                        PermissionUtil.showPermission(MainActivity.this,PERMISSIONS[0], REQUEST_CODE_PERMISSION);
                     }
                     if (permissionDialog.isShowing()) {
                         permissionDialog.dismiss();
@@ -346,21 +366,10 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
                 } else {
-                    initActivity();
+                    readContact();
                 }
             }
         }
-    }
-
-    private boolean isGranted(String permission) {
-        return PermissionUtil.checkPermission(this, permission);
-    }
-
-    private void showPermission(String permission) {
-        ActivityCompat.requestPermissions(
-                this,
-                new String[]{permission},
-                REQUEST_CODE_PERMISSION);
     }
 
     @Override

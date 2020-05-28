@@ -7,7 +7,7 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@+id/emojicons">
+        android:layout_above="@+id/frameMain">
 
         <io.github.rockerhieu.emojicon.EmojiconTextView
             android:id="@+id/txtEmojicon"
@@ -46,11 +46,18 @@
         android:layout_marginStart="20dp"
         android:layout_marginEnd="20dp" />
 
-    <fragment
-        android:id="@+id/emojicons"
-        class="io.github.rockerhieu.emojicon.EmojiconsFragment"
+    <FrameLayout
+        android:id="@+id/frameMain"
+        android:layout_alignParentBottom="true"
         android:layout_width="match_parent"
-        android:layout_height="350dp"
-        android:layout_alignParentBottom="true" />
+        android:layout_height="350dp"/>
+<!--    <fragment-->
+<!--        android:id="@+id/emojicons"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="350dp"-->
+<!--        android:layout_alignParentBottom="true" />-->
+
+<!--    class="io.github.rockerhieu.emojicon.EmojiconsFragment"-->
+
 
 </RelativeLayout>

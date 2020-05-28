@@ -13,10 +13,10 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.contact.R;
-import com.example.contact.adapter.AlphabetAdapter;
 import com.example.contact.activity.EmojiActivity;
-import com.example.contact.activity.MainActivity;
+import com.example.contact.adapter.AlphabetAdapter;
 import com.example.contact.adapter.ContactAdapter;
+import com.example.contact.asyntask.ReadFIle;
 import com.example.contact.model.Contact;
 import com.example.contact.utils.Utils;
 
@@ -27,6 +27,7 @@ import butterknife.ButterKnife;
 import butterknife.Unbinder;
 
 public class ContactFragment extends Fragment {
+
     private static final String TAG = "ContactFragment";
     @BindView(R.id.rv_contact)
     RecyclerView rvContact;
@@ -37,6 +38,7 @@ public class ContactFragment extends Fragment {
     private RecyclerView rvAlphabet;
     private ArrayList<Contact> contacts = new ArrayList<>(); // list contains emoji
     private ArrayList<Contact> alphabet = new ArrayList<>();
+    private  ContactAdapter contactAdapter;
 
     @Nullable
     @Override
@@ -50,16 +52,10 @@ public class ContactFragment extends Fragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        ContactAdapter contactAdapter = new ContactAdapter();
+       contactAdapter = new ContactAdapter();
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getContext());
         rvContact.setLayoutManager(layoutManager);
         rvContact.setAdapter(contactAdapter);
-
-        list.clear();
-        list.addAll(Utils.getContactList(getContext()));
-        Utils.sort(list);
-
-        contactAdapter.setListContacts(list);
 
         contactAdapter.setListener(contact -> {
             Intent intent = new Intent(getContext(), EmojiActivity.class);
@@ -70,13 +66,13 @@ public class ContactFragment extends Fragment {
 
         alphabet.clear();
         for (int i = 0; i < list.size(); i++) {
-            if (list.get(i).getType() == Contact.Type.CONTACT) {
+            if (list.get(i).getType() == 0) {
                 if (Utils.check(list.get(i).getName())) {
                     contacts.add(list.get(i));
                 }
             }
 
-            if (list.get(i).getType() == Contact.Type.TITLE){
+            if (list.get(i).getType() == 1){
                 alphabet.add(list.get(i));
             }
         }
@@ -88,7 +84,7 @@ public class ContactFragment extends Fragment {
 
         alphabetAdapter.setListener(contact -> {
             String text = contact.getName();
-            int index = getIndex(text, list);
+            int index = Utils.getIndex(text, list);
             if (index > 0){
                 rvContact.scrollToPosition(index);
             }
@@ -96,14 +92,29 @@ public class ContactFragment extends Fragment {
 
     }
 
-    private int getIndex(String text, ArrayList<Contact> list){
-        for (int i = 0; i < list.size(); i++) {
-            if (list.get(i).getName().toLowerCase().startsWith(text.toLowerCase()) && list.get(i).getType() == Contact.Type.CONTACT){
-                return list.indexOf(list.get(i));
-            }
-        }
+    @Override
+    public void onResume() {
+        super.onResume();
+        list.clear();
+        list.addAll(Utils.getContactList(getContext()));
+        Utils.sort(list);
 
-        return -1;
+        contactAdapter.setListContacts(list);
+        contactAdapter.notifyDataSetChanged();
+
+        ReadFIle readFIle = new ReadFIle(new ReadFIle.CallBack() {
+            @Override
+            public void onPreExecute() {
+
+            }
+
+            @Override
+            public void onPostExecute(ArrayList<Contact> list) {
+                list.clear();
+                list.addAll(list);
+            }
+        });
+        readFIle.execute(getContext());
     }
 
     @Override
