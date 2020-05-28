@@ -43,6 +43,7 @@ import com.example.contact.asyntask.ReadFIle;
 import com.example.contact.dialog.PermissionDialog;
 import com.example.contact.fragment.ContactFragment;
 import com.example.contact.fragment.EmojiFragment;
+import com.example.contact.interfaces.Key;
 import com.example.contact.model.Contact;
 import com.example.contact.utils.PermissionUtil;
 import com.example.contact.utils.Utils;
@@ -53,7 +54,7 @@ import java.util.ArrayList;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends BaseActivity {
 
     private static final String TAG = "MainActivity";
 
@@ -97,11 +98,12 @@ public class MainActivity extends AppCompatActivity {
     private boolean check = false;
 
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        ButterKnife.bind(this);
+    protected int LayoutRes() {
+        return R.layout.activity_main;
+    }
 
+    @Override
+    protected void initActivity() {
         rlSearch = findViewById(R.id.rl_search);
         rvSearch = findViewById(R.id.rv_search);
 
@@ -109,58 +111,14 @@ public class MainActivity extends AppCompatActivity {
 
         loadViewSearch(false);
 
-        listener();
-
         contactAdapter = new ContactAdapter();
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(MainActivity.this);
         rvSearch.setLayoutManager(layoutManager);
         rvSearch.setAdapter(contactAdapter);
-
     }
 
-    private void readContact(){
-        ReadFIle readFIle = new ReadFIle(new ReadFIle.CallBack() {
-            @Override
-            public void onPreExecute() {
-
-            }
-
-            @Override
-            public void onPostExecute(ArrayList<Contact> list) {
-                listContacts.clear();
-                listEmoji.clear();
-
-                listContacts.addAll(list);
-
-                for (int i = 0; i < listContacts.size(); i++) {
-                    if (Utils.check(listContacts.get(i).getName())) {
-                        listEmoji.add(listContacts.get(i));
-                    }
-                }
-
-                if (!check){
-                    Fragment[] fms = {contactFragment, emojiFragment};
-                    viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager(), fms);
-                    viewPager.setAdapter(viewPagerAdapter);
-                    tabLayout.setupWithViewPager(viewPager);
-                }
-
-                check = true;
-
-                contactAdapter.setListener(contact -> {
-                    Intent intent = new Intent(MainActivity.this, EmojiActivity.class);
-                    intent.putExtra("name", contact.getName());
-                    intent.putExtra("id", contact.getId());
-                    startActivity(intent);
-                });
-
-            }
-        });
-
-        readFIle.execute(MainActivity.this);
-    }
-
-    private void listener() {
+    @Override
+    protected void listener() {
         imMenu.setOnClickListener(v -> {
             PopupMenu popupMenu = new PopupMenu(MainActivity.this, imMenu);
             popupMenu.getMenuInflater().inflate(R.menu.popup_menu, popupMenu.getMenu());
@@ -248,8 +206,49 @@ public class MainActivity extends AppCompatActivity {
 
         imClose.setOnClickListener(v -> clearText(edtSearch));
 
+        contactAdapter.setListener(contact -> {
+            Intent intent = new Intent(MainActivity.this, EmojiActivity.class);
+            intent.putExtra(Key.KEY_NAME, contact.getName());
+            intent.putExtra(Key.KEY_ID, contact.getId());
+            startActivity(intent);
+        });
+
     }
 
+    private void readContact(){
+        ReadFIle readFIle = new ReadFIle(new ReadFIle.CallBack() {
+            @Override
+            public void onPreExecute() {
+
+            }
+
+            @Override
+            public void onPostExecute(ArrayList<Contact> list) {
+                listContacts.clear();
+                listEmoji.clear();
+
+                listContacts.addAll(list);
+
+                for (int i = 0; i < listContacts.size(); i++) {
+                    if (Utils.check(listContacts.get(i).getName())) {
+                        listEmoji.add(listContacts.get(i));
+                    }
+                }
+
+                if (!check){
+                    Fragment[] fms = {contactFragment, emojiFragment};
+                    viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager(), fms);
+                    viewPager.setAdapter(viewPagerAdapter);
+                    tabLayout.setupWithViewPager(viewPager);
+                }
+
+                check = true;
+
+            }
+        });
+
+        readFIle.execute(MainActivity.this);
+    }
 
     private void clearText(EditText editText) {
         if (editText.getText().toString().isEmpty()) {

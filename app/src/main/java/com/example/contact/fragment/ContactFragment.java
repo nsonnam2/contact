@@ -2,6 +2,7 @@ package com.example.contact.fragment;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,9 +15,11 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.contact.R;
 import com.example.contact.activity.EmojiActivity;
+import com.example.contact.activity.MainActivity;
 import com.example.contact.adapter.AlphabetAdapter;
 import com.example.contact.adapter.ContactAdapter;
 import com.example.contact.asyntask.ReadFIle;
+import com.example.contact.interfaces.Key;
 import com.example.contact.model.Contact;
 import com.example.contact.utils.Utils;
 
@@ -26,7 +29,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 
-public class ContactFragment extends Fragment {
+public class ContactFragment extends BaseFragment {
 
     private static final String TAG = "ContactFragment";
     @BindView(R.id.rv_contact)
@@ -36,33 +39,21 @@ public class ContactFragment extends Fragment {
     private ArrayList<Contact> list = new ArrayList<>();
     private AlphabetAdapter alphabetAdapter;
     private RecyclerView rvAlphabet;
-    private ArrayList<Contact> contacts = new ArrayList<>(); // list contains emoji
+    private ArrayList<Contact> contacts = new ArrayList<>();
     private ArrayList<Contact> alphabet = new ArrayList<>();
     private  ContactAdapter contactAdapter;
 
-    @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_contact, container, false);
-        unbinder = ButterKnife.bind(this, view);
-        return view;
+    protected int LayoutRes() {
+        return R.layout.fragment_contact;
     }
 
     @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-
-       contactAdapter = new ContactAdapter();
+    protected void initFragment() {
+        contactAdapter = new ContactAdapter();
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getContext());
         rvContact.setLayoutManager(layoutManager);
         rvContact.setAdapter(contactAdapter);
-
-        contactAdapter.setListener(contact -> {
-            Intent intent = new Intent(getContext(), EmojiActivity.class);
-            intent.putExtra("name", contact.getName());
-            intent.putExtra("id", contact.getId());
-            startActivity(intent);
-        });
 
         alphabet.clear();
         for (int i = 0; i < list.size(); i++) {
@@ -81,6 +72,16 @@ public class ContactFragment extends Fragment {
         alphabetAdapter = new AlphabetAdapter(getContext());
         rvAlphabet.setAdapter(alphabetAdapter);
         alphabetAdapter.setList(alphabet);
+    }
+
+    @Override
+    protected void listener() {
+        contactAdapter.setListener(contact -> {
+            Intent intent = new Intent(getContext(), EmojiActivity.class);
+            intent.putExtra(Key.KEY_NAME, contact.getName());
+            intent.putExtra(Key.KEY_ID, contact.getId());
+            startActivity(intent);
+        });
 
         alphabetAdapter.setListener(contact -> {
             String text = contact.getName();
@@ -89,7 +90,6 @@ public class ContactFragment extends Fragment {
                 rvContact.scrollToPosition(index);
             }
         });
-
     }
 
     @Override
@@ -115,11 +115,5 @@ public class ContactFragment extends Fragment {
             }
         });
         readFIle.execute(getContext());
-    }
-
-    @Override
-    public void onDestroy() {
-        unbinder.unbind();
-        super.onDestroy();
     }
 }

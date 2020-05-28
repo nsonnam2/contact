@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Bundle;
 import android.os.Handler;
 import android.provider.Settings;
 import android.text.Editable;
@@ -17,12 +16,11 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.example.contact.R;
 import com.example.contact.dialog.PermissionDialog;
+import com.example.contact.interfaces.Key;
 import com.example.contact.utils.PermissionUtil;
 import com.example.contact.utils.Utils;
 
@@ -32,53 +30,51 @@ import io.github.rockerhieu.emojicon.EmojiconTextView;
 import io.github.rockerhieu.emojicon.EmojiconsFragment;
 import io.github.rockerhieu.emojicon.emoji.Emojicon;
 
-public class EmojiActivity extends AppCompatActivity implements EmojiconGridFragment.OnEmojiconClickedListener, EmojiconsFragment.OnEmojiconBackspaceClickedListener {
+public class EmojiActivity extends BaseActivity implements EmojiconGridFragment.OnEmojiconClickedListener, EmojiconsFragment.OnEmojiconBackspaceClickedListener {
 
     private static final String TAG = "EmopjiActivity";
     private EmojiconEditText editText;
     private EmojiconTextView textView;
     private Button button;
     private String id = "";
-    private String name = "";
     private String[] PERMISSIONS = {Manifest.permission.WRITE_CONTACTS};
     private boolean isDenyShowAgain = false;
     private static final int REQUEST_CODE_PERMISSION = 1;
     private PermissionDialog permissionDialog;
     private Load load;
-    private Handler handler;
-    private EmojiconsFragment emojiconsFragment;
 
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_emoji);
+    protected int LayoutRes() {
+        return R.layout.activity_emoji;
+    }
 
+    @Override
+    protected void initActivity() {
         textView = findViewById(R.id.txtEmojicon);
         editText = findViewById(R.id.editEmojicon);
         button = findViewById(R.id.btn_save);
 
-        handler = new Handler();
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                load = new Load(EmojiActivity.this);
-                load.execute();
-            }
+        Handler handler = new Handler();
+        handler.postDelayed(() -> {
+            load = new Load(EmojiActivity.this);
+            load.execute();
         }, 100);
 
         permissionDialog = new PermissionDialog(this);
 
         Intent intent = getIntent();
-        id = intent.getStringExtra("id");
-        name = intent.getStringExtra("name");
+        id = intent.getStringExtra(Key.KEY_ID);
+        String name1 = intent.getStringExtra(Key.KEY_NAME);
 
-        textView.setText(name);
-        editText.setText(name);
+        textView.setText(name1);
+        editText.setText(name1);
         editText.setCursorVisible(false);
         editText.onEditorAction(EditorInfo.IME_ACTION_DONE);
         focusRight();
+    }
 
-
+    @Override
+    protected void listener() {
         editText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -132,9 +128,7 @@ public class EmojiActivity extends AppCompatActivity implements EmojiconGridFrag
                 });
             }
         });
-
     }
-
 
     @Override
     public void onEmojiconClicked(Emojicon emojicon) {
@@ -183,6 +177,7 @@ public class EmojiActivity extends AppCompatActivity implements EmojiconGridFrag
         public Load (Activity activity){
             this.activity = activity;
         }
+
         @Override
         protected void onPreExecute() {
             editText.setVisibility(View.GONE);
@@ -190,7 +185,7 @@ public class EmojiActivity extends AppCompatActivity implements EmojiconGridFrag
 
         @Override
         protected Void doInBackground(Void... voids) {
-            emojiconsFragment = new  EmojiconsFragment();
+            EmojiconsFragment emojiconsFragment = new EmojiconsFragment();
             FragmentTransaction sr = getSupportFragmentManager().beginTransaction();
             sr.add(R.id.frameMain, emojiconsFragment);
             sr.commit();

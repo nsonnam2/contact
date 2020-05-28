@@ -13,51 +13,43 @@
             android:id="@+id/txtEmojicon"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="30dp"
-            emojicon:emojiconAlignment="baseline"
             android:layout_centerInParent="true"
-            android:textSize="32sp"
-            android:maxLines="3"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="30dp"
+            android:layout_marginEnd="20dp"
             android:ellipsize="end"
             android:gravity="center"
-            android:layout_marginEnd="20dp"
-            android:layout_marginStart="20dp"/>
+            android:maxLines="3"
+            android:textSize="32sp"
+            emojicon:emojiconAlignment="baseline" />
+
+        <io.github.rockerhieu.emojicon.EmojiconEditText
+            android:id="@+id/editEmojicon"
+            android:layout_width="match_parent"
+            android:layout_height="10dp"
+            android:layout_alignParentBottom="true"
+            android:layout_marginStart="30dp"
+            android:layout_marginEnd="30dp"
+            android:layout_marginBottom="15dp"
+            android:background="@null"
+            android:ellipsize="end"
+            android:gravity="center"
+            android:singleLine="true"
+            android:textSize="26sp" />
 
         <Button
             android:id="@+id/btn_save"
             android:layout_width="match_parent"
             android:layout_height="50dp"
-            android:text="save"
-            android:layout_alignParentBottom="true"/>
+            android:layout_alignParentBottom="true"
+            android:text="save" />
 
     </RelativeLayout>
 
-    <io.github.rockerhieu.emojicon.EmojiconEditText
-        android:id="@+id/editEmojicon"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_marginBottom="15dp"
-        android:background="@null"
-        android:gravity="center"
-        android:textSize="26sp"
-        android:ellipsize="end"
-        android:singleLine="true"
-        android:layout_marginStart="20dp"
-        android:layout_marginEnd="20dp" />
-
     <FrameLayout
         android:id="@+id/frameMain"
-        android:layout_alignParentBottom="true"
         android:layout_width="match_parent"
-        android:layout_height="350dp"/>
-<!--    <fragment-->
-<!--        android:id="@+id/emojicons"-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="350dp"-->
-<!--        android:layout_alignParentBottom="true" />-->
-
-<!--    class="io.github.rockerhieu.emojicon.EmojiconsFragment"-->
-
+        android:layout_height="350dp"
+        android:layout_alignParentBottom="true" />
 
 </RelativeLayout>
