@@ -39,10 +39,12 @@ public class EmojiActivity extends BaseActivity implements EmojiconGridFragment.
     private EmojiconTextView textView;
     private Button button;
     private String id = "";
+
     private String[] PERMISSIONS = {Manifest.permission.WRITE_CONTACTS};
     private boolean isDenyShowAgain = false;
     private static final int REQUEST_CODE_PERMISSION = 1;
     private PermissionDialog permissionDialog;
+
     private Load load;
     private ProgressBar dialog;
 

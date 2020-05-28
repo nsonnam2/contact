@@ -87,12 +87,14 @@ public class MainActivity extends BaseActivity {
     private PermissionDialog permissionDialog;
 
     private ViewPagerAdapter viewPagerAdapter;
+    private ContactAdapter contactAdapter;
+
     private ContactFragment contactFragment = new ContactFragment();
     private EmojiFragment emojiFragment = new EmojiFragment();
     private ArrayList<Contact> listContacts = new ArrayList<>();
     private ArrayList<Contact> listSearch = new ArrayList<>();
     private ArrayList<Contact> listEmoji = new ArrayList<>();
-    private ContactAdapter contactAdapter;
+
     int tabPosition = -1;
     private String textSearch = "";
     private boolean check = false;

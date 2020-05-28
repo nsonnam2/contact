@@ -29,6 +29,7 @@ public class AlphabetAdapter extends RecyclerView.Adapter<AlphabetAdapter.Alphab
 
     public void setList(ArrayList<Contact> list) {
         this.list = list;
+        notifyDataSetChanged();
     }
 
     @NonNull

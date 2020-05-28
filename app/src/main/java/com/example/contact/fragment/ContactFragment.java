@@ -22,16 +22,14 @@ import butterknife.Unbinder;
 public class ContactFragment extends BaseFragment {
 
     private static final String TAG = "ContactFragment";
+
     @BindView(R.id.rv_contact)
     RecyclerView rvContact;
-    private Unbinder unbinder;
 
     private ArrayList<Contact> listContacts = new ArrayList<>();
-    private AlphabetAdapter alphabetAdapter;
-    private RecyclerView rvAlphabet;
-    private ArrayList<Contact> contacts = new ArrayList<>();
-
     private ArrayList<Contact> alphabet = new ArrayList<>();
+
+    private AlphabetAdapter alphabetAdapter;
     private  ContactAdapter contactAdapter;
 
     @Override
@@ -46,23 +44,9 @@ public class ContactFragment extends BaseFragment {
         rvContact.setLayoutManager(layoutManager);
         rvContact.setAdapter(contactAdapter);
 
-        alphabet.clear();
-        for (int i = 0; i < listContacts.size(); i++) {
-            if (listContacts.get(i).getType() == 0) {
-                if (Utils.check(listContacts.get(i).getName())) {
-                    contacts.add(listContacts.get(i));
-                }
-            }
-
-            if (listContacts.get(i).getType() == 1){
-                alphabet.add(listContacts.get(i));
-            }
-        }
-
-        rvAlphabet = getActivity().findViewById(R.id.rv_alphabet);
+        RecyclerView rvAlphabet = getActivity().findViewById(R.id.rv_alphabet);
         alphabetAdapter = new AlphabetAdapter(getContext());
         rvAlphabet.setAdapter(alphabetAdapter);
-        alphabetAdapter.setList(alphabet);
     }
 
     @Override
@@ -99,7 +83,16 @@ public class ContactFragment extends BaseFragment {
                 listContacts.addAll(list);
 
                 contactAdapter.setListContacts(Utils.sort(listContacts));
-                contactAdapter.notifyDataSetChanged();
+
+                ArrayList<Contact> contacts = new ArrayList<>();
+                contacts.addAll(Utils.sort(list));
+                alphabet.clear();
+                for (int i = 0; i < contacts.size(); i++) {
+                    if (contacts.get(i).getType() == 1){
+                        alphabet.add(contacts.get(i));
+                    }
+                }
+                alphabetAdapter.setList(alphabet);
             }
         });
 

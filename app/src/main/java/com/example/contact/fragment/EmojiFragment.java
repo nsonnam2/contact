@@ -2,6 +2,7 @@ package com.example.contact.fragment;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -53,14 +54,6 @@ public class EmojiFragment extends BaseFragment {
         alphabetAdapter = new AlphabetAdapter(getContext());
         rvAlphabet.setAdapter(alphabetAdapter);
 
-        listAlphabet.clear();
-        for (int i = 0; i < listEmoji.size(); i++) {
-            if (listEmoji.get(i).getType() == 1) {
-                listAlphabet.add(listEmoji.get(i));
-            }
-        }
-
-        alphabetAdapter.setList(listAlphabet);
     }
 
     @Override
@@ -93,18 +86,29 @@ public class EmojiFragment extends BaseFragment {
 
             @Override
             public void onPostExecute(ArrayList<Contact> list) {
-                listContacts.clear();
-                listContacts.addAll(list);
-
+                // TODO: 5/28/2020 fix bug
                 listEmoji.clear();
-                for (int i = 0; i < listContacts.size(); i++) {
-                    if (Utils.check(listContacts.get(i).getName())) {
-                        listEmoji.add(listContacts.get(i));
+                for (int i = 0; i < list.size(); i++) {
+                    if (Utils.check(list.get(i).getName())) {
+                        listEmoji.add(list.get(i));
                     }
                 }
 
+                Log.d("Namns", "onPostExecute: 1" + listEmoji.size());
                 contactAdapter.setListContacts(Utils.sort(listEmoji));
-                contactAdapter.notifyDataSetChanged();
+                Log.d("Namns", "onPostExecute: 2" + listEmoji.size());
+
+                ArrayList<Contact> contacts = new ArrayList<>();
+                contacts.addAll(Utils.sort(listEmoji));
+
+                listAlphabet.clear();
+                for (int i = 0; i < contacts.size(); i++) {
+                    if (contacts.get(i).getType() == 1) {
+                        listAlphabet.add(contacts.get(i));
+                    }
+                }
+
+                alphabetAdapter.setList(listAlphabet);
             }
         });
 
