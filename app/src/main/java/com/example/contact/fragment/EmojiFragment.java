@@ -86,7 +86,6 @@ public class EmojiFragment extends BaseFragment {
 
             @Override
             public void onPostExecute(ArrayList<Contact> list) {
-                // TODO: 5/28/2020 fix bug
                 listEmoji.clear();
                 for (int i = 0; i < list.size(); i++) {
                     if (Utils.check(list.get(i).getName())) {
@@ -94,9 +93,17 @@ public class EmojiFragment extends BaseFragment {
                     }
                 }
 
-                Log.d("Namns", "onPostExecute: 1" + listEmoji.size());
+                Log.d("Namns", "onPostExecute: 1 - " + listEmoji.size());
                 contactAdapter.setListContacts(Utils.sort(listEmoji));
-                Log.d("Namns", "onPostExecute: 2" + listEmoji.size());
+                Log.d("Namns", "onPostExecute: 2 - " + listEmoji.size());
+
+                // TODO: 5/28/2020 fix logic later
+                listEmoji.clear();
+                for (int i = 0; i < list.size(); i++) {
+                    if (Utils.check(list.get(i).getName())) {
+                        listEmoji.add(list.get(i));
+                    }
+                }
 
                 ArrayList<Contact> contacts = new ArrayList<>();
                 contacts.addAll(Utils.sort(listEmoji));
