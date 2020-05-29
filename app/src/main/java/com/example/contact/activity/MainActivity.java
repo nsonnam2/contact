@@ -124,22 +124,19 @@ public class MainActivity extends BaseActivity {
         imMenu.setOnClickListener(v -> {
             PopupMenu popupMenu = new PopupMenu(MainActivity.this, imMenu);
             popupMenu.getMenuInflater().inflate(R.menu.popup_menu, popupMenu.getMenu());
-            popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-                @Override
-                public boolean onMenuItemClick(MenuItem item) {
-                    switch (item.getItemId()) {
-                        case R.id.rate:
-                            Toast.makeText(MainActivity.this, "Rate", Toast.LENGTH_SHORT).show();
-                            break;
-                        case R.id.about:
-                            Toast.makeText(MainActivity.this, "About", Toast.LENGTH_SHORT).show();
-                            break;
-                        case R.id.privacy:
-                            Toast.makeText(MainActivity.this, "Privacy policy", Toast.LENGTH_SHORT).show();
-                            break;
-                    }
-                    return true;
+            popupMenu.setOnMenuItemClickListener(item -> {
+                switch (item.getItemId()) {
+                    case R.id.rate:
+                        Toast.makeText(MainActivity.this, "Rate", Toast.LENGTH_SHORT).show();
+                        break;
+                    case R.id.about:
+                        Toast.makeText(MainActivity.this, "About", Toast.LENGTH_SHORT).show();
+                        break;
+                    case R.id.privacy:
+                        Toast.makeText(MainActivity.this, "Privacy policy", Toast.LENGTH_SHORT).show();
+                        break;
                 }
+                return true;
             });
             popupMenu.show();
         });

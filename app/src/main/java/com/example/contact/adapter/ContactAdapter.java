@@ -39,7 +39,6 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-
         if (viewType == TYPE_CONTACT) {
             return new ContactHolder(LayoutInflater.from(parent.getContext()).inflate(ContactHolder.LAYOUT_RES, parent, false));
         }

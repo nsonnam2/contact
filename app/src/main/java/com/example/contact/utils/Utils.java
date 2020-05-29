@@ -70,7 +70,7 @@ public class Utils {
 
     public static ArrayList<Contact> sort(ArrayList<Contact> listContacts) {
         if (listContacts.size() > 0){
-            Collections.sort(listContacts, (o1, o2) -> o1.getName().compareToIgnoreCase(o2.getName()));
+            Collections.sort(listContacts, (o1, o2) -> o1.getName().toLowerCase().compareToIgnoreCase(o2.getName().toLowerCase()));
 
             Contact contact = new Contact("", listContacts.get(0).getName().substring(0, 1), 1 ,false);
             listContacts.add(0, contact);
@@ -120,6 +120,7 @@ public class Utils {
                     .build());
 
             contentResolver.applyBatch(ContactsContract.AUTHORITY, ops);
+
         } catch (OperationApplicationException | RemoteException e) {
             e.printStackTrace();
         }
